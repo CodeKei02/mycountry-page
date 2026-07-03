@@ -1,0 +1,23 @@
+---
+import "@/styles/global.css";
+import { Intro } from "@/layouts/intro";
+import { Gallery } from "@/layouts/gallery";
+import images from "../../data/images.json";
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Venezuela</title>
+  </head>
+  <body class="bg-black relative">
+    <div class="relative z-10">
+      <Intro client:only title="Vistazo a  Venezuela" />
+    </div>
+    <div class="relative z-30 bg-black mt-[-100vh]">
+      <Gallery client:only images={images as { src: string; alt: string }[]} />
+    </div>
+  </body>
+</html>
