@@ -45,8 +45,8 @@ export const Gallery = ({
       const titleTl = gsap.timeline({
         scrollTrigger: {
           trigger: wrapperRef.current,
-          start: "top bottom",
-          end: "top top",
+          start: "top top",
+          end: "+=60%",
           scrub: 1,
         },
       });
@@ -59,7 +59,6 @@ export const Gallery = ({
           stagger: 0.08,
           duration: 0.5,
         })
-
         .to(
           titleRef.current,
           {
@@ -123,18 +122,52 @@ export const Gallery = ({
             trigger: image,
             start: "top 95%",
             toggleActions: "play none none reverse",
+            pinnedContainer: wrapperRef.current,
           },
         });
       });
     }, wrapperRef);
 
-    (window as any).__ST = ScrollTrigger;
-    const refresh = () => ScrollTrigger.refresh();
-    const raf = requestAnimationFrame(refresh);
-    window.addEventListener("load", refresh);
+    // The gallery images are AVIF files with no intrinsic size until they
+    // decode, and this island renders with `client:only` on top of another
+    // `client:only` island (the h-[300vh] map). Its scroll position therefore
+    // isn't final until BOTH islands have hydrated and every image has been
+    // decoded. If ScrollTrigger measures before that settles, the -100vh
+    // overlap yields negative/garbage positions (the title snaps to the nav
+    // instantly and image reveals fire at the wrong points). We recompute
+    // positions whenever the layout can still change.
+    let rafId = 0;
+    const refresh = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => ScrollTrigger.refresh());
+    };
+
+    const images = Array.from(
+      galleryRef.current!.querySelectorAll("img"),
+    ) as HTMLImageElement[];
+
+    images.forEach((image) => {
+      image
+        .decode()
+        .then(refresh)
+        .catch(() => refresh());
+    });
+
+    if (document.readyState === "complete") {
+      refresh();
+    } else {
+      window.addEventListener("load", refresh);
+    }
+
+    // Safety nets for the cross-island layout settling after hydration.
+    const timeouts = [
+      window.setTimeout(refresh, 200),
+      window.setTimeout(refresh, 1000),
+    ];
 
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(rafId);
+      timeouts.forEach((id) => window.clearTimeout(id));
       window.removeEventListener("load", refresh);
       ctx.revert();
     };
