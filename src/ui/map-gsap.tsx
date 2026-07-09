@@ -23,9 +23,6 @@ export const MapGsap = () => {
       scrollTrigger: {
         trigger: containerRef.current,
         start: "top top",
-        // El dibujo se completa temprano (~30% del contenedor); el resto del
-        // recorrido mantiene el mapa pineado y ya dibujado mientras la galería
-        // sube por encima y lo va tapando.
         end: "30% top",
         scrub: true,
       },
@@ -38,8 +35,20 @@ export const MapGsap = () => {
       ease: "none",
     });
 
+    const fade = gsap.to(svgRef.current, {
+      opacity: 0,
+      ease: "none",
+      scrollTrigger: {
+        trigger: containerRef.current,
+        start: "40% top",
+        end: "bottom bottom",
+        scrub: true,
+      },
+    });
+
     return () => {
       tl.kill();
+      fade.kill();
       ScrollTrigger.getAll().forEach((st) => st.kill());
     };
   }, []);

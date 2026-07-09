@@ -67,12 +67,14 @@ export const Intro = ({ title }: { title: string }) => {
   return (
     <div>
       <div ref={introRef} className="h-30 relative">
-        <h1
-          ref={titleRef}
-          className="uppercase text-white font-bold text-3xl md:text-6xl flex justify-center items-center fixed left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-        >
-          {title}
-        </h1>
+        <div className="fixed inset-0 flex justify-center items-center pointer-events-none px-4">
+          <h1
+            ref={titleRef}
+            className="uppercase text-white font-bold text-center leading-tight text-[clamp(1.75rem,8vw,4rem)]"
+          >
+            {title}
+          </h1>
+        </div>
         <span
           ref={arrowRef}
           className="arrow fixed left-1/2 bottom-10 -translate-x-1/2 -translate-y-1/2"

@@ -16,8 +16,69 @@ import images from "../../data/images.json";
     <div class="relative z-10">
       <Intro client:only title="Vistazo a  Venezuela" />
     </div>
-    <div class="relative z-30 bg-black mt-[-100vh]">
+    <div class="relative z-30 overflow-hidden" style="margin-top: -100vh">
       <Gallery client:only images={images as { src: string; alt: string }[]} />
     </div>
+
+    <audio id="bg-audio" src="/music/tone.mp3" loop preload="auto"></audio>
+
+    <button
+      id="audio-toggle"
+      type="button"
+      aria-label="Reproducir tono"
+      aria-pressed="false"
+      class="fixed bottom-6 right-6 z-50 flex h-14 w-14 items-center justify-center rounded-full border border-white/20 bg-white/10 text-white backdrop-blur-md transition-all duration-300 hover:scale-105 hover:bg-white/20 focus:outline-none focus-visible:ring-2 focus-visible:ring-white/60"
+    >
+      <svg
+        id="icon-play"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        class="h-6 w-6"
+      >
+        <path d="M8 5.14v13.72a1 1 0 0 0 1.54.84l10.29-6.86a1 1 0 0 0 0-1.68L9.54 4.3A1 1 0 0 0 8 5.14z" />
+      </svg>
+      <svg
+        id="icon-pause"
+        xmlns="http://www.w3.org/2000/svg"
+        viewBox="0 0 24 24"
+        fill="currentColor"
+        class="hidden h-6 w-6"
+      >
+        <path d="M6 4h4v16H6zM14 4h4v16h-4z" />
+      </svg>
+    </button>
+
+    <script>
+      const audio = document.getElementById("bg-audio") as HTMLAudioElement;
+      const toggle = document.getElementById("audio-toggle") as HTMLButtonElement;
+      const iconPlay = document.getElementById("icon-play") as unknown as SVGElement;
+      const iconPause = document.getElementById("icon-pause") as unknown as SVGElement;
+
+      function setPlayingUI(isPlaying: boolean) {
+        iconPlay.classList.toggle("hidden", isPlaying);
+        iconPause.classList.toggle("hidden", !isPlaying);
+        toggle.setAttribute("aria-pressed", String(isPlaying));
+        toggle.setAttribute(
+          "aria-label",
+          isPlaying ? "Pausar tono" : "Reproducir tono"
+        );
+      }
+
+      toggle.addEventListener("click", async () => {
+        if (audio.paused) {
+          try {
+            await audio.play();
+          } catch (err) {
+            console.error("No se pudo reproducir el audio", err);
+          }
+        } else {
+          audio.pause();
+        }
+      });
+
+      audio.addEventListener("play", () => setPlayingUI(true));
+      audio.addEventListener("pause", () => setPlayingUI(false));
+    </script>
   </body>
 </html>
